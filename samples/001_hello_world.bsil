@@ -1,0 +1,54 @@
+#main FUNC 0
+   PUSH STR #0
+   CALL log 1
+   PUSH IDENT a
+   PUSH INT 1
+   ASSIGN
+   PUSH IDENT b
+   PUSH INT 2
+   ASSIGN
+   PUSH IDENT c
+   PUSH IDENT a
+   PUSH IDENT b
+   ADD
+   ASSIGN
+   PUSH IDENT c
+   PUSH STR #1
+   CALL log 2
+   PUSH IDENT do_math
+   PUSH FUNC #2
+   ASSIGN
+   PUSH IDENT result
+   PUSH INT 5
+   PUSH IDENT c
+   CALL do_math 2
+   ASSIGN
+   PUSH IDENT result
+   PUSH STR #3
+   CALL log 2
+   PUSH INT 10
+   PUSH IDENT result
+   CMPGT
+   JZ #4
+   PUSH STR #6
+   CALL log 1
+   JZ #5
+#4
+   PUSH STR #7
+   CALL log 1
+#5
+   PUSH STR #8
+   CALL log 1
+#0 STR "Hello world!"
+#1 STR "Result: "
+#2 FUNC 2
+   POP x
+   POP y
+   PUSH IDENT x
+   PUSH IDENT y
+   ADD
+   RET
+#3 STR "Result 2: "
+#6 STR "You did good, son"
+#7 STR "Into the fire pit, son. "
+#8 STR "Time to go to work"

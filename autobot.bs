@@ -1,0 +1,173 @@
+# Demonstrates a basic AI script to lead an OpenRA team to victory!
+
+# Some global state for our bot
+
+state = {
+	bases:    0,
+	building: 0,
+	infantry: 0
+}
+
+
+barracks_name = ""
+army = {}
+
+
+OnInit = [] : {
+	log[ "Autobot Script Starting..." ]
+	log[ "Team: ", Team[] ]
+
+	if Team[] == "allies" {
+		barracks_name = "tent"
+		army.e1 = 7
+		army.e3 = 4
+	} else {
+		barracks_name = "barr"
+		army.e1 = 7
+		army.e3 = 4
+	}
+}
+
+
+OnThink = [] : {
+	log[ "Thinking..." ]
+
+	if state.bases == 0 {
+		log[ "No base! Finding MCV..." ]
+
+		mcv = FindUnitByName[ "mcv" ]
+		if mcv.length == 0 {
+			log[ "PANIC: NO MCV!" ]
+			return
+		}
+
+		log[ "Found unit: ", mcv.name, ", id: ", mcv.id ]
+
+		# Deploy it if we can
+		log[ "Deploying unit..." ]
+		DeployUnit[ mcv ]
+	}
+
+	pickNextBuilding[]
+	pickNextInfantry[]
+}
+
+# Called when a unit is deployed. Parameter is the new unit/building
+OnUnitDeployed = [ unit ] : {
+	log[ "Unit deployed: ", unit.name, ", id: ", unit.id ]
+
+	if unit.name == "fact" {
+		state.bases += 1
+		log[ "MCV deployed, base operational!" ]
+	}
+}
+
+
+# Called when one of the players units gets attacked by an enemy
+OnUnitAttacked = [ unit, enemy ] : {
+	# If we have a chance of killing the enemy, try it
+	if IsEffectiveAgainst[ unit, enemy ] {
+		Attack[ unit, enemy ]
+	} else {
+		# Otherwise run away
+		Retreat[ unit, GetBaseLocation[], 3 ]
+	}
+
+	# Do we have friendlies nearby that can help?
+	friendlies = GetNearbyUnits[ unit ]
+	for u in friendlies {
+		if IsEffectiveAgainst[ u, enemy ] {
+			Attack[ u, enemy ]
+		}
+	}
+}
+
+
+OnConstructionComplete = [ name ] : {
+	if name == "powr" or name == "apwr" {
+		# "inner" will try to place the building behind defenses
+		DeployBuilding[ name, "inner" ]
+	} else if name == "proc" {
+		# "ore" will try to place the building near ore
+		DeployBuilding[ name, "ore" ]
+	}
+}
+
+
+OnUnitReady = [ unit ] : {
+	log[ "Unit ready: ", unit.name ]
+	pickNextInfantry[]
+}
+
+
+# User function: Starts building something
+build = [ name ] : {
+	state.building = name
+	Build[ name ]
+}
+
+
+idealRefineries = [] : {
+	# TODO: Pick an ideal number of refineries based on army size & cash monies
+	return 1
+}
+
+
+# User function: Does some sanity checking & chooses the next
+# building to build.
+pickNextBuilding = [] : {
+	# Don"t start building something else if we are already
+	if state.building != nil {
+		return
+	}
+
+	# Check our power level
+	p = GetPowerExcess[]
+	if p <= 0 {
+		log[ "Need power (have ", p, ") - building power plant" ]
+
+		# Try building an advanced power plant first
+		if CanBuild[ "apwr" ] {
+			return build[ "apwr" ]
+		}
+
+		return build[ "powr" ]
+	}
+
+	# Do we have refineries?
+	c = GetBuildingCount[ "proc" ]
+	if c < idealRefineries[] {
+		return build[ "proc" ]
+	}
+
+	# How about barracks/tent?
+	if GetBuildingCount[ barracks_name ] < 1 {
+		return build[ barracks_name ]
+	}
+}
+
+
+pickNextInfantry = [] : {
+	if state.infantry != nil {
+		return
+	}
+
+	if GetBuildingCount[ barracks_name ] < 1 {
+		# Don"t have a barracks!
+		return
+	}
+
+	all_units = GetInfantry[]
+
+	for k, v in army {
+		amount = CountUnits[ k, all_units ]
+
+		if amount < v {
+			log[ "Unit type ", k, "'s count of ", amount, " is less than target ", v ]
+			state.infantry = k
+			Build[ k ]
+			return
+		}
+	}
+}
+
