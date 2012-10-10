@@ -1,0 +1,7 @@
+compiler
+assembler
+*-parser.c
+*-tokens.c
+*.tab.*
+*.o
+*.output

@@ -1,0 +1,22 @@
+log[ "Hello world!" ]
+
+a = 1
+b = 2
+c = a + b
+log[ "Result: ", c ]
+
+do_math = [x, y] : {
+   return x + y
+}
+
+result = do_math[ c, 5 ]
+
+log[ "Result 2: ", result ]
+
+if result > 10 {
+   log[ "You did good, son" ]
+} else {
+   log[ "Into the fire pit, son. " ]
+}
+
+log[ "Time to go to work" ]
