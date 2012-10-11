@@ -5,3 +5,4 @@ assembler
 *.tab.*
 *.o
 *.output
+*.swp

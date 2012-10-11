@@ -39,6 +39,8 @@
 #5
    PUSH STR #8
    CALL log 1
+   PUSH NIL
+   RET
 #0 STR "Hello world!"
 #1 STR "Result: "
 #2 FUNC 2

@@ -20,7 +20,7 @@ class BSIdentifier;
 class BSExpression;
 class BSFunctionDefinition;
 
-class SymbolTable {
+class SymbolRegistrar {
 public:
    static string RegisterSymbol( const string& s );
    static string RegisterSymbol( BSFunctionDefinition* func );
@@ -99,7 +99,19 @@ public:
    BSString( const string& value_ ) : value( value_ ) { D( "BSString: '%s'", value.c_str() ); }
 
    virtual void codegen( ostream& oss ) {
-      oss << "   PUSH STR " << SymbolTable::RegisterSymbol( value ) << endl;
+      oss << "   PUSH STR " << SymbolRegistrar::RegisterSymbol( value ) << endl;
+   }
+};
+
+class BSReturn : public BSStatement {
+public:
+   BSExpression* expression;
+   BSReturn() : expression( new BSNil() ) { D( "BSReturn" ); }
+   BSReturn( BSExpression* expr ) : expression( expr ) { D( "BSReturn expr" ); }
+
+   virtual void codegen( ostream& oss ) {
+      expression->codegen( oss );
+      oss << "   RET" << endl;
    }
 };
 
@@ -118,17 +130,17 @@ public:
          }
       }
    }
-};
 
-class BSReturn : public BSStatement {
-public:
-   BSExpression* expression;
-   BSReturn() : expression( new BSNil() ) { D( "BSReturn" ); }
-   BSReturn( BSExpression* expr ) : expression( expr ) { D( "BSReturn expr" ); }
+   void ensure_return() {
+      // Ensure functions have a return instruction
+      if( statements.size() ) {
+         BSReturn* ret = dynamic_cast<BSReturn*>( statements.back() );
+         if( ret ) {
+            return;
+         }
+      }
 
-   virtual void codegen( ostream& oss ) {
-      expression->codegen( oss );
-      oss << "   RET" << endl;
+      statements.push_back( new BSReturn() );
    }
 };
 
@@ -204,10 +216,13 @@ public:
 
    BSFunctionDefinition( IdentifierList* args_,
                          BSBlock* body_ )
-      : args( args_ ), body( body_ ) { }
+      : args( args_ ), body( body_ )
+   {
+      body->ensure_return();
+   }
 
    virtual void codegen( ostream& oss ) {
-      string symname = SymbolTable::RegisterSymbol( this );
+      string symname = SymbolRegistrar::RegisterSymbol( this );
       oss << "   PUSH FUNC " << symname << endl;
    }
 };
@@ -236,8 +251,8 @@ public:
       : BSConditionalBlock( expr, stmts ), else_statements( else_stmts ) { D( "BSIfBlock with else" ); }
 
    virtual void codegen( ostream& oss ) {
-      string first = SymbolTable::RegisterLabel();
-      string second = SymbolTable::RegisterLabel();
+      string first = SymbolRegistrar::RegisterLabel();
+      string second = SymbolRegistrar::RegisterLabel();
 
       expression->codegen( oss );
       oss << "   JZ " << first << endl;

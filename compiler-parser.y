@@ -189,10 +189,12 @@ main( int argc, char* argv[] )
       yyparse();
    } while( !feof( yyin ) );
 
+   script->ensure_return();
+
    ostringstream oss;
    oss << "#main FUNC 0" << endl;
    script->codegen( oss );
-   SymbolTable::codegen( oss );
+   SymbolRegistrar::codegen( oss );
 
    cout << oss.str();
 }

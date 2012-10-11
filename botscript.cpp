@@ -3,11 +3,11 @@
 #include <sstream>
 #include <stdlib.h>
 
-size_t SymbolTable::symnum = 0;
-map<string, string> SymbolTable::symbols;
+size_t SymbolRegistrar::symnum = 0;
+map<string, string> SymbolRegistrar::symbols;
 
 string
-SymbolTable::RegisterSymbol( const string& s )
+SymbolRegistrar::RegisterSymbol( const string& s )
 {
    string symname = NewSymbolName();
    ostringstream oss;
@@ -18,13 +18,13 @@ SymbolTable::RegisterSymbol( const string& s )
 
 
 string
-SymbolTable::RegisterLabel()
+SymbolRegistrar::RegisterLabel()
 {
    return NewSymbolName();
 }
 
 string
-SymbolTable::RegisterSymbol( BSFunctionDefinition* func )
+SymbolRegistrar::RegisterSymbol( BSFunctionDefinition* func )
 {
    ostringstream oss;
    oss << "FUNC " << func->args->size() << endl;
@@ -40,7 +40,7 @@ SymbolTable::RegisterSymbol( BSFunctionDefinition* func )
 }
 
 void
-SymbolTable::codegen( ostream& oss )
+SymbolRegistrar::codegen( ostream& oss )
 {
    map<string, string>::iterator it;
    for( it = symbols.begin(); it != symbols.end(); ++it ) {

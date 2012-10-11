@@ -18,10 +18,10 @@ compiler-tokens.o : compiler-tokens.c botscript.h
 compiler-tokens.c : compiler-tokens.l compiler-parser.tab.h
 	flex -o $@ compiler-tokens.l
 
-assembler : assembler-parser.o assembler-tokens.o
-	g++ -o $@ assembler-parser.o assembler-tokens.o
+assembler : assembler-parser.o assembler-tokens.o code-generator.o bit-stream.o
+	g++ -o $@ assembler-parser.o assembler-tokens.o code-generator.o bit-stream.o
 
-assembler-parser.o : assembler-parser.tab.c assembler-parser.tab.h
+assembler-parser.o : assembler-parser.tab.c assembler-parser.tab.h code-generator.h symbol-table.h
 	g++ -g -c -o $@ assembler-parser.tab.c
 
 assembler-parser.tab.c assembler-parser.tab.h : assembler-parser.y
@@ -33,6 +33,11 @@ assembler-tokens.o : assembler-tokens.c
 assembler-tokens.c : assembler-tokens.l
 	flex -o $@ assembler-tokens.l
 
+code-generator.o : code-generator.cpp code-generator.h assembler-parser.tab.h bit-stream.h
+	g++ -g -c -o $@ code-generator.cpp
+
+bit-stream.o : bit-stream.h
+	g++ -g -c -o $@ bit-stream.cpp
 
 clean :
 	rm -f *.o *.output *.tab.* *tokens.c compiler assembler
