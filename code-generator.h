@@ -180,8 +180,8 @@ class RET : public Instruction {
 
 class STRINGDEF : public Instruction {
 public:
-   STRINGDEF( const string& ref_, const string& str_ )
-      : ref( ref_ ), str( str_ ) {}
+   STRINGDEF( const string& ref_, int len, const string& str_ )
+      : ref( ref_ ), str( str_.data(), len ) {}
 
 private:
    string ref;

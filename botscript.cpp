@@ -11,7 +11,7 @@ SymbolRegistrar::RegisterSymbol( const string& s )
 {
    string symname = NewSymbolName();
    ostringstream oss;
-   oss << "STR " << s << endl;
+   oss << "STR " << s.size() << " " << s << endl;
    symbols[ symname ] = oss.str();
    return symname;
 }

@@ -41,8 +41,8 @@
    CALL log 1
    PUSH NIL
    RET
-#0 STR "Hello world!"
-#1 STR "Result: "
+#0 STR 14 "Hello world!"
+#1 STR 10 "Result: "
 #2 FUNC 2
    POP x
    POP y
@@ -50,7 +50,7 @@
    PUSH IDENT y
    ADD
    RET
-#3 STR "Result 2: "
-#6 STR "You did good, son"
-#7 STR "Into the fire pit, son. "
-#8 STR "Time to go to work"
+#3 STR 12 "Result 2: "
+#6 STR 19 "You did good, son"
+#7 STR 26 "Into the fire pit, son. "
+#8 STR 20 "Time to go to work"
